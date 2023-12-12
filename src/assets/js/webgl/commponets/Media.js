@@ -1,4 +1,5 @@
 import { Mesh, ShaderMaterial, TextureLoader, Vector2 } from 'three';
+import { gsap } from 'gsap';
 
 import vertexShader from "../shader/vertex.glsl";
 import fragmentShader from "../shader/fragment.glsl";
@@ -29,6 +30,7 @@ export default class Media {
     this.createMesh();
     this.createBounds();
     this.onResize();
+    // this.animateMedia();
   }
 
   createMesh() {
@@ -43,12 +45,20 @@ export default class Media {
         uImageSizes: { value: new Vector2(this.img.naturalWidth, this.img.naturalHeight) },
         uViewportSizes: { value: new Vector2(this.viewport.width, this.viewport.height) },
         uStrength: { value: 0 },
+        uOpacity: { value: 0 },
       },
       transparent: true,
     });
 
     this.plane = new Mesh(this.geometry, material);
     this.scene.add(this.plane);
+    
+    // console.log(this.plane.material.uniforms.uOpacity.value)
+    // gsap.to(this.plane.material.uniforms.uOpacity, {
+    //   value: 1.0,
+    //   duration: 1.5,
+    //   ease: "power3.inOut",
+    // })
   }
 
   createBounds() {
@@ -141,4 +151,13 @@ export default class Media {
     //   this.isAfter = false;
     // }
   }
+
+  // animateMedia() {
+  //   this.medias.forEach(media => {
+  //     console.log(media.plane.material);
+  //     gsap.set(media.plane.material, {
+  //       opacity: 0,
+  //     });
+  //   })
+  // }
 }

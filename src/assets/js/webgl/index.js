@@ -11,6 +11,7 @@ import {
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import NormalizeWheel from "normalize-wheel";
 import GUI from "lil-gui";
+import gsap from "gsap";
 import Media from "./commponets/Media";
 
 export default class webGL {
@@ -82,6 +83,8 @@ export default class webGL {
     this.update();
 
     this.addEventListeners();
+
+    this.animate()
   }
 
   _createGallery() {
@@ -269,5 +272,22 @@ export default class webGL {
     window.addEventListener('touchstart', this.onTouchDown.bind(this));
     window.addEventListener('touchmove', this.onTouchMove.bind(this));
     window.addEventListener('touchend', this.onTouchUp.bind(this));
+  }
+
+  animate() {
+    this.medias.forEach((media, index) => {
+      // console.log(media.plane.material.uniforms.uOpacity);
+      gsap.to(media.plane.material.uniforms.uOpacity, {
+        value: 1.0,
+        duration: 1,
+        delay: index * 0.3,
+        ease: "power3.inOut",
+        stagger: {
+          from: "random",
+          amount: 0.3,
+          ease: "power2.out",
+        }
+      });
+    })
   }
 }
