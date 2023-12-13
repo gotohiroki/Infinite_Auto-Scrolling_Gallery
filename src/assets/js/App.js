@@ -12,7 +12,3 @@ const preloadImages = () => {
 preloadImages().then(() => {
   new webGL("#webgl");
 });
-
-window.addEventListener("DOMContentLoaded", () => {
-  // app.init();
-});

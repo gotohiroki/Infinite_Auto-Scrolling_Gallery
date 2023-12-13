@@ -1,5 +1,4 @@
 import { Mesh, ShaderMaterial, TextureLoader, Vector2 } from 'three';
-import { gsap } from 'gsap';
 
 import vertexShader from "../shader/vertex.glsl";
 import fragmentShader from "../shader/fragment.glsl";
@@ -51,14 +50,7 @@ export default class Media {
     });
 
     this.plane = new Mesh(this.geometry, material);
-    this.scene.add(this.plane);
-    
-    // console.log(this.plane.material.uniforms.uOpacity.value)
-    // gsap.to(this.plane.material.uniforms.uOpacity, {
-    //   value: 1.0,
-    //   duration: 1.5,
-    //   ease: "power3.inOut",
-    // })
+    this.scene.add(this.plane); 
   }
 
   createBounds() {
