@@ -4065,6 +4065,61 @@ uniform float uOpacity;
 
 varying vec2 vUv;
 
+vec3 mod289(vec3 x) {
+  return x - floor(x * (1.0 / 289.0)) * 289.0;
+}
+
+vec2 mod289(vec2 x) {
+  return x - floor(x * (1.0 / 289.0)) * 289.0;
+}
+
+vec3 permute(vec3 x) {
+  return mod289(((x*34.0)+1.0)*x);
+}
+
+float snoise(vec2 v)
+  {
+  const vec4 C = vec4(0.211324865405187,  
+                      0.366025403784439,  
+                     -0.577350269189626,  
+                      0.024390243902439); 
+
+  vec2 i  = floor(v + dot(v, C.yy) );
+  vec2 x0 = v -   i + dot(i, C.xx);
+
+  vec2 i1;
+  
+  
+  i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+  
+  
+  
+  vec4 x12 = x0.xyxy + C.xxzz;
+  x12.xy -= i1;
+
+  i = mod289(i); 
+  vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))
+    + i.x + vec3(0.0, i1.x, 1.0 ));
+
+  vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
+  m = m*m ;
+  m = m*m ;
+
+  vec3 x = 2.0 * fract(p * C.www) - 1.0;
+  vec3 h = abs(x) - 0.5;
+  vec3 ox = floor(x + 0.5);
+  vec3 a0 = x - ox;
+
+  m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
+
+  vec3 g;
+  g.x  = a0.x  * x0.x  + h.x  * x0.y;
+  g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+  return 130.0 * dot(m, g);
+}
+
+#pragma glslify: export(snoise)
+
 void main() {
   vec2 ratio = vec2(
     min((uPlaneSizes.x / uPlaneSizes.y) / (uImageSizes.x / uImageSizes.y), 1.0),
@@ -4075,6 +4130,8 @@ void main() {
     vUv.x * ratio.x + (1.0 - ratio.x) * 0.5,
     vUv.y * ratio.y + (1.0 - ratio.y) * 0.5
   );
+
+  
   
   gl_FragColor.rgb = texture2D(tMap, uv).rgb;
   gl_FragColor.a = uOpacity;
@@ -4082,4 +4139,4 @@ void main() {
  * imagesLoaded v5.0.0
  * JavaScript is all like "You images are done yet or what?"
  * MIT License
- */(function(r){(function(e,t){r.exports?r.exports=t(e,Y0()):e.imagesLoaded=t(e,e.EvEmitter)})(typeof window<"u"?window:Mh,function(t,n){let i=t.jQuery,s=t.console;function o(u){return Array.isArray(u)?u:typeof u=="object"&&typeof u.length=="number"?[...u]:[u]}function a(u,p,g){if(!(this instanceof a))return new a(u,p,g);let _=u;if(typeof u=="string"&&(_=document.querySelectorAll(u)),!_){s.error(`Bad element for imagesLoaded ${_||u}`);return}this.elements=o(_),this.options={},typeof p=="function"?g=p:Object.assign(this.options,p),g&&this.on("always",g),this.getImages(),i&&(this.jqDeferred=new i.Deferred),setTimeout(this.check.bind(this))}a.prototype=Object.create(n.prototype),a.prototype.getImages=function(){this.images=[],this.elements.forEach(this.addElementImages,this)};const l=[1,9,11];a.prototype.addElementImages=function(u){u.nodeName==="IMG"&&this.addImage(u),this.options.background===!0&&this.addElementBackgroundImages(u);let{nodeType:p}=u;if(!p||!l.includes(p))return;let g=u.querySelectorAll("img");for(let _ of g)this.addImage(_);if(typeof this.options.background=="string"){let _=u.querySelectorAll(this.options.background);for(let m of _)this.addElementBackgroundImages(m)}};const c=/url\((['"])?(.*?)\1\)/gi;a.prototype.addElementBackgroundImages=function(u){let p=getComputedStyle(u);if(!p)return;let g=c.exec(p.backgroundImage);for(;g!==null;){let _=g&&g[2];_&&this.addBackground(_,u),g=c.exec(p.backgroundImage)}},a.prototype.addImage=function(u){let p=new h(u);this.images.push(p)},a.prototype.addBackground=function(u,p){let g=new d(u,p);this.images.push(g)},a.prototype.check=function(){if(this.progressedCount=0,this.hasAnyBroken=!1,!this.images.length){this.complete();return}let u=(p,g,_)=>{setTimeout(()=>{this.progress(p,g,_)})};this.images.forEach(function(p){p.once("progress",u),p.check()})},a.prototype.progress=function(u,p,g){this.progressedCount++,this.hasAnyBroken=this.hasAnyBroken||!u.isLoaded,this.emitEvent("progress",[this,u,p]),this.jqDeferred&&this.jqDeferred.notify&&this.jqDeferred.notify(this,u),this.progressedCount===this.images.length&&this.complete(),this.options.debug&&s&&s.log(`progress: ${g}`,u,p)},a.prototype.complete=function(){let u=this.hasAnyBroken?"fail":"done";if(this.isComplete=!0,this.emitEvent(u,[this]),this.emitEvent("always",[this]),this.jqDeferred){let p=this.hasAnyBroken?"reject":"resolve";this.jqDeferred[p](this)}};function h(u){this.img=u}h.prototype=Object.create(n.prototype),h.prototype.check=function(){if(this.getIsImageComplete()){this.confirm(this.img.naturalWidth!==0,"naturalWidth");return}this.proxyImage=new Image,this.img.crossOrigin&&(this.proxyImage.crossOrigin=this.img.crossOrigin),this.proxyImage.addEventListener("load",this),this.proxyImage.addEventListener("error",this),this.img.addEventListener("load",this),this.img.addEventListener("error",this),this.proxyImage.src=this.img.currentSrc||this.img.src},h.prototype.getIsImageComplete=function(){return this.img.complete&&this.img.naturalWidth},h.prototype.confirm=function(u,p){this.isLoaded=u;let{parentNode:g}=this.img,_=g.nodeName==="PICTURE"?g:this.img;this.emitEvent("progress",[this,_,p])},h.prototype.handleEvent=function(u){let p="on"+u.type;this[p]&&this[p](u)},h.prototype.onload=function(){this.confirm(!0,"onload"),this.unbindEvents()},h.prototype.onerror=function(){this.confirm(!1,"onerror"),this.unbindEvents()},h.prototype.unbindEvents=function(){this.proxyImage.removeEventListener("load",this),this.proxyImage.removeEventListener("error",this),this.img.removeEventListener("load",this),this.img.removeEventListener("error",this)};function d(u,p){this.url=u,this.element=p,this.img=new Image}return d.prototype=Object.create(h.prototype),d.prototype.check=function(){this.img.addEventListener("load",this),this.img.addEventListener("error",this),this.img.src=this.url,this.getIsImageComplete()&&(this.confirm(this.img.naturalWidth!==0,"naturalWidth"),this.unbindEvents())},d.prototype.unbindEvents=function(){this.img.removeEventListener("load",this),this.img.removeEventListener("error",this)},d.prototype.confirm=function(u,p){this.isLoaded=u,this.emitEvent("progress",[this,this.element,p])},a.makeJQueryPlugin=function(u){u=u||t.jQuery,u&&(i=u,i.fn.imagesLoaded=function(p,g){return new a(this,p,g).jqDeferred.promise(i(this))})},a.makeJQueryPlugin(),a})})(Cu);var q0=Cu.exports;const $0=Sh(q0);const j0=()=>new Promise(r=>{$0(document.querySelectorAll("img"),r)});j0().then(()=>{new X0("#webgl")});window.addEventListener("DOMContentLoaded",()=>{});
+ */(function(r){(function(e,t){r.exports?r.exports=t(e,Y0()):e.imagesLoaded=t(e,e.EvEmitter)})(typeof window<"u"?window:Mh,function(t,n){let i=t.jQuery,s=t.console;function o(u){return Array.isArray(u)?u:typeof u=="object"&&typeof u.length=="number"?[...u]:[u]}function a(u,p,g){if(!(this instanceof a))return new a(u,p,g);let _=u;if(typeof u=="string"&&(_=document.querySelectorAll(u)),!_){s.error(`Bad element for imagesLoaded ${_||u}`);return}this.elements=o(_),this.options={},typeof p=="function"?g=p:Object.assign(this.options,p),g&&this.on("always",g),this.getImages(),i&&(this.jqDeferred=new i.Deferred),setTimeout(this.check.bind(this))}a.prototype=Object.create(n.prototype),a.prototype.getImages=function(){this.images=[],this.elements.forEach(this.addElementImages,this)};const l=[1,9,11];a.prototype.addElementImages=function(u){u.nodeName==="IMG"&&this.addImage(u),this.options.background===!0&&this.addElementBackgroundImages(u);let{nodeType:p}=u;if(!p||!l.includes(p))return;let g=u.querySelectorAll("img");for(let _ of g)this.addImage(_);if(typeof this.options.background=="string"){let _=u.querySelectorAll(this.options.background);for(let m of _)this.addElementBackgroundImages(m)}};const c=/url\((['"])?(.*?)\1\)/gi;a.prototype.addElementBackgroundImages=function(u){let p=getComputedStyle(u);if(!p)return;let g=c.exec(p.backgroundImage);for(;g!==null;){let _=g&&g[2];_&&this.addBackground(_,u),g=c.exec(p.backgroundImage)}},a.prototype.addImage=function(u){let p=new h(u);this.images.push(p)},a.prototype.addBackground=function(u,p){let g=new d(u,p);this.images.push(g)},a.prototype.check=function(){if(this.progressedCount=0,this.hasAnyBroken=!1,!this.images.length){this.complete();return}let u=(p,g,_)=>{setTimeout(()=>{this.progress(p,g,_)})};this.images.forEach(function(p){p.once("progress",u),p.check()})},a.prototype.progress=function(u,p,g){this.progressedCount++,this.hasAnyBroken=this.hasAnyBroken||!u.isLoaded,this.emitEvent("progress",[this,u,p]),this.jqDeferred&&this.jqDeferred.notify&&this.jqDeferred.notify(this,u),this.progressedCount===this.images.length&&this.complete(),this.options.debug&&s&&s.log(`progress: ${g}`,u,p)},a.prototype.complete=function(){let u=this.hasAnyBroken?"fail":"done";if(this.isComplete=!0,this.emitEvent(u,[this]),this.emitEvent("always",[this]),this.jqDeferred){let p=this.hasAnyBroken?"reject":"resolve";this.jqDeferred[p](this)}};function h(u){this.img=u}h.prototype=Object.create(n.prototype),h.prototype.check=function(){if(this.getIsImageComplete()){this.confirm(this.img.naturalWidth!==0,"naturalWidth");return}this.proxyImage=new Image,this.img.crossOrigin&&(this.proxyImage.crossOrigin=this.img.crossOrigin),this.proxyImage.addEventListener("load",this),this.proxyImage.addEventListener("error",this),this.img.addEventListener("load",this),this.img.addEventListener("error",this),this.proxyImage.src=this.img.currentSrc||this.img.src},h.prototype.getIsImageComplete=function(){return this.img.complete&&this.img.naturalWidth},h.prototype.confirm=function(u,p){this.isLoaded=u;let{parentNode:g}=this.img,_=g.nodeName==="PICTURE"?g:this.img;this.emitEvent("progress",[this,_,p])},h.prototype.handleEvent=function(u){let p="on"+u.type;this[p]&&this[p](u)},h.prototype.onload=function(){this.confirm(!0,"onload"),this.unbindEvents()},h.prototype.onerror=function(){this.confirm(!1,"onerror"),this.unbindEvents()},h.prototype.unbindEvents=function(){this.proxyImage.removeEventListener("load",this),this.proxyImage.removeEventListener("error",this),this.img.removeEventListener("load",this),this.img.removeEventListener("error",this)};function d(u,p){this.url=u,this.element=p,this.img=new Image}return d.prototype=Object.create(h.prototype),d.prototype.check=function(){this.img.addEventListener("load",this),this.img.addEventListener("error",this),this.img.src=this.url,this.getIsImageComplete()&&(this.confirm(this.img.naturalWidth!==0,"naturalWidth"),this.unbindEvents())},d.prototype.unbindEvents=function(){this.img.removeEventListener("load",this),this.img.removeEventListener("error",this)},d.prototype.confirm=function(u,p){this.isLoaded=u,this.emitEvent("progress",[this,this.element,p])},a.makeJQueryPlugin=function(u){u=u||t.jQuery,u&&(i=u,i.fn.imagesLoaded=function(p,g){return new a(this,p,g).jqDeferred.promise(i(this))})},a.makeJQueryPlugin(),a})})(Cu);var q0=Cu.exports;const $0=Sh(q0);const j0=()=>new Promise(r=>{$0(document.querySelectorAll("img"),r)});j0().then(()=>{new X0("#webgl")});
